@@ -1,59 +1,33 @@
 import React from "react";
 import PropTypes from 'prop-types';
+import axios from "axios";
+import Movie from "./Movie";
+import "./App.css";
 
-function Beer({name, picture, rating}){
-  return (
-    <div>
-      <h3>I Like {name}</h3>
-      <h4>{rating}/5.0</h4>
-      <img src={picture} alt={name} />
-    </div>
-  )
-}
+class App extends React.Component {
+  state = {
+    isLoading : true,
+    movies : [],
+  }
 
-const beerILike = [
-  {
-    id:1,
-    name : "써머스비",
-    image : "https://file.mk.co.kr/meet/neds/2019/07/image_readtop_2019_585083_15645527523847686.jpg",
-    rating : 5.0,
-  },
-  {
-    id:2,
-    name : "예거",
-    image : "https://cdn.dailycnc.com/news/photo/202006/101986_197399_4053.jpg",
-    rating : 4.0,
-  },
-  {
-    id:3,
-    name : "곰표맥주",
-    image : "https://dimg.donga.com/ugc/CDB/SHINDONGA/Article/5f/11/41/eb/5f1141eb12e0d2738de6.jpg",
-    rating : 3.0,
-  },
-  {
-    id:4,
-    name : "버드와이저",
-    image : "https://img.etnews.com/photonews/1901/1152597_20190128152140_286_0001.jpg",
-    rating : 2.0,
-  },
-]
+  getMovies = async () => {
+    const {data : {data : {movies}}} = await axios("https://yts-proxy.nomadcoders1.now.sh/list_movies.json");
+    this.setState({movies, isLoading : false});
+  }
 
-function renderBeer(beer){
-  return <Beer name={beer.name} picture={beer.image} rating={beer.rating} key={beer.id}/>
-}
+  componentDidMount(){
+    this.getMovies();
+  }
 
-Beer.propTypes = {
-  name : PropTypes.string.isRequired,
-  picture : PropTypes.string.isRequired,
-  rating : PropTypes.number.isRequired,
-}
-
-function App() {
-  return( 
-    <div>
-      {beerILike.map(renderBeer)}
-    </div>
-  )
+  render(){
+    const {isLoading, movies} = this.state;
+    return (
+      <div className="container">{
+        isLoading ? <section className="section"><span className="section__text">Loading...</span></section> : movies.map(movie => <Movie key={movie.id} id={movie.id} title={movie.title} year={movie.year} summary={movie.summary} poster={movie.medium_cover_image} genres={movie.genres}/>)
+        }
+      </div>
+    )
+  }
 }
 
 export default App; 
